@@ -13,7 +13,7 @@ là snake and ladder nhưng có DLC "đéo chơi được bình thường".
 
 
 
-##Cách chơi
+## Cách chơi
 
 1. Mở [Snake Slop](https://cursed-slop-2.nekoasakura2009.workers.dev/).
 2. Chọn chơi offline hoặc tạo phòng online.
