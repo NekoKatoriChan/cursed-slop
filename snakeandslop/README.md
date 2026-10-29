@@ -1,10 +1,30 @@
-# Rắn và Thang — Online V3 (Private Rooms)
+# Snake Slop
+### Rắn và thang, nhưng rác.
 
-Features: offline and private-room multiplayer; selectable auto-generated 50/200-cell boards, generated custom dimensions, and saved custom maps; custom starting gold, card draw chance, dice sides (4/6/8/10/12), and toggles for cards/snakes/ladders/portals/events/slow zones; green/yellow cinematic effects; three randomly scattered black shards for the passive black-tier TẬN THẾ instant-win objective; Dev Mode manual shard collection and re-scattering on the current map; host lobby settings, ready state, room lock/unlock, kick (lobby only), optional spectators, revision-checked WebSocket snapshots, protected reconnect keys, reactions, and rematches.
 
-## Deploy once to Cloudflare Workers
+<p align="center">
+  <a href="https://cursed-slop-2.nekoasakura2009.workers.dev/"><strong>▶ nút chơi liền nè :p</strong></a>
+</p>
 
-Requires Node.js and a Cloudflare account. From this folder:
+# Cái méo gì đang diễn ra vậy?
+......uh 
+# Trò này là gì?
+là snake and ladder nhưng có DLC "đéo chơi được bình thường".
+
+
+
+##Cách chơi
+
+1. Mở [Snake Slop](https://cursed-slop-2.nekoasakura2009.workers.dev/).
+2. Chọn chơi offline hoặc tạo phòng online.
+3. Nếu chơi online, gửi mã/link phòng cho người khác.
+4. Chỉnh luật nếu bạn là chủ phòng và muốn chịu trách nhiệm cho những gì sắp xảy ra.
+5. Đổ xúc xắc, di chuyển, dùng thẻ, và cố gắng thắng.
+6. Khi mọi thứ vượt khỏi tầm kiểm soát, hãy bình tĩnh (hoặc cay cú đập máy).
+
+## Tự host à? giàu và thông minh thí!
+
+Cần Node.js và tài khoản Cloudflare. Trong thư mục /snakeandslop/*
 
 ```sh
 npm install
@@ -13,12 +33,6 @@ npm run check
 npm run deploy
 ```
 
-Wrangler deploys the HTML assets and realtime Worker/ Durable Object together. The deploy output gives a `*.workers.dev` URL. Open that URL and use **Chơi online · Phòng riêng**. The default Worker name is aligned to `cursed-slop-2`, matching the successful deployment logged for this project. The URL you send your friends is generated in-game; they only need a browser.
+Miễn trừ trách nhiệm: Snake Slop được tạo ra hoàn toàn vì mục đích giải trí; mọi tình bạn tan vỡ, liên minh phản bội, cơn khủng hoảng hiện sinh hay quyết định ném điện thoại sau một ván chơi đều nằm ngoài phạm vi bảo hành của nhà phát triển.
 
-## Notes
-
-- There is no public room browser. Anyone with an invite link/code can request entry; the host may lock the room and kick players while in the lobby.
-- Room IDs are random 7-character codes and idle rooms expire after 12 hours. The host key and each player’s per-room reconnect key are stored locally and never included in the invite URL or public room state. A visible browser ID alone cannot impersonate a player.
-- The host needs to be online to change lobby settings/start/rematch. During the match, the current player sends the state update to the room. Turn ownership and revision are checked server-side; the server still accepts a client-generated game snapshot, so this is a friend-room prototype, not a hardened anti-cheat platform.
-- The host chooses custom lobby rules before starting. A saved custom map for online play is read from the host browser only and then shipped with the initial room snapshot. The room code is added to the address bar, so a page refresh reconnects to the same invite room. Player reconnect uses a per-room secret in local storage. While playing, disconnected turns are skipped only when at least two players remain connected.
-- Cloudflare billing/quotas depend on the current account plan and platform limits. Check the dashboard before public use.
+(make wif love and silly)
