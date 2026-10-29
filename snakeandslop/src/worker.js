@@ -16,12 +16,28 @@ function cleanName(value) {
 }
 function defaults(raw = {}) {
   const maxPlayers = [2, 3, 4].includes(Number(raw.maxPlayers)) ? Number(raw.maxPlayers) : 4;
+  const allowedBoards = ["50", "200", "custom", "saved"];
+  const num = (value, fallback, min, max) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.max(min, Math.min(max, Math.round(n))) : fallback;
+  };
   return {
     maxPlayers,
-    board: raw.board === "200" ? "200" : "50",
-    difficulty: Math.max(1, Math.min(5, Math.round(Number(raw.difficulty) || 3))),
+    board: allowedBoards.includes(raw.board) ? raw.board : "50",
+    difficulty: num(raw.difficulty, 3, 1, 5),
     startCards: raw.startCards === true,
     allowSpectators: raw.allowSpectators !== false,
+    cols: num(raw.cols, 10, 5, 20),
+    rows: num(raw.rows, 10, 5, 40),
+    startGold: num(raw.startGold, 8, 0, 100),
+    cardChance: num(raw.cardChance, 10, 0, 50),
+    diceSides: [4, 6, 8, 10, 12].includes(Number(raw.diceSides)) ? Number(raw.diceSides) : 6,
+    allowCards: raw.allowCards !== false,
+    allowSnakes: raw.allowSnakes !== false,
+    allowLadders: raw.allowLadders !== false,
+    allowPortals: raw.allowPortals !== false,
+    allowEvents: raw.allowEvents !== false,
+    allowSlowZones: raw.allowSlowZones !== false,
   };
 }
 
@@ -366,7 +382,24 @@ function validSnapshot(s, playerCount) {
       if (!Array.isArray(p.cards) || p.cards.some(i => !Number.isInteger(i) || i < 0 || i > 1000)) return false;
     }
     if (!Number.isInteger(g.win) || g.win < -1 || g.win >= playerCount) return false;
-    if (g.win >= 0 && g.p[g.win].pos !== last) return false;
+    if (g.shards !== undefined) {
+      if (!Array.isArray(g.shards) || g.shards.length !== 3) return false;
+      const shardPositions = new Set();
+      for (const shard of g.shards) {
+        if (!shard || !Number.isInteger(shard.pos) || shard.pos < 1 || shard.pos >= last || typeof shard.collected !== 'boolean') return false;
+        if (shardPositions.has(shard.pos)) return false;
+        shardPositions.add(shard.pos);
+      }
+      for (const p of g.p) if (p.blackShards !== undefined && (!Number.isInteger(p.blackShards) || p.blackShards < 0 || p.blackShards > 3)) return false;
+    }
+    if (g.win >= 0) {
+      const reachedFinish = g.p[g.win].pos === last;
+      const allShardsCollected = Array.isArray(g.shards) && g.shards.length === 3 && g.shards.every(shard => shard && shard.collected === true);
+      const wonByBlackShards = g.cataclysmWin === true && g.winReason === 'black-shards' && g.p[g.win].blackShards === 3 && allShardsCollected;
+      if (!reachedFinish && !wonByBlackShards) return false;
+      if (g.cataclysmWin === true && !wonByBlackShards) return false;
+    }
+    if (g.cataclysmWin === true && g.win < 0) return false;
     return true;
   } catch { return false; }
 }
