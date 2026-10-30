@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/worker.js && node tests/smoke.mjs",
+    "check": "node --check worker.js && node tests/smoke.mjs",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

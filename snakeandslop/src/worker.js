@@ -14,6 +14,9 @@ function cleanName(value) {
   const name = String(value || "Guest").trim().replace(/[<>\r\n]/g, "").slice(0, 18);
   return name || "Guest";
 }
+function cleanChatText(value) {
+  return String(value || "").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim().slice(0, 280);
+}
 function defaults(raw = {}) {
   const maxPlayers = [2, 3, 4].includes(Number(raw.maxPlayers)) ? Number(raw.maxPlayers) : 4;
   const allowedBoards = ["50", "200", "custom", "saved"];
@@ -44,7 +47,12 @@ function defaults(raw = {}) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/api/health") return json({ ok: true, service: "snake-and-slop-online", privateRoomsOnly: true });
+    if (url.pathname === "/api/health") return json({ ok: true, service: "snake-and-slop-online", publicRooms: true, freeChat: true });
+
+    if (url.pathname === "/api/rooms" && request.method === "GET") {
+      const registryId = env.ROOMS.idFromName("__snake_slop_public_registry__");
+      return env.ROOMS.get(registryId).fetch("https://registry.internal/_registry/list");
+    }
 
     if (url.pathname === "/api/rooms" && request.method === "POST") {
       let body;
@@ -52,7 +60,7 @@ export default {
       const clientId = String(body.clientId || "").slice(0, 80);
       if (!clientId) return json({ error: "Missing clientId" }, 400);
       const name = cleanName(body.name);
-      const settings = defaults(body.settings || {});
+      const settings = { ...defaults(body.settings || {}), visibility: body.settings?.visibility === "public" ? "public" : "private" };
       for (let attempt = 0; attempt < 4; attempt++) {
         const roomCode = randomCode(7);
         const id = env.ROOMS.idFromName(roomCode);
@@ -90,6 +98,35 @@ export class Room {
 
   async fetch(request) {
     const url = new URL(request.url);
+    // A single Durable Object (using the existing ROOMS binding) maintains the public lobby index.
+    // It is deliberately separate from ordinary room state and never exposes private-room codes.
+    if (url.pathname === "/_registry/list" && request.method === "GET") {
+      const rows = await this.state.storage.get("publicRooms") || [];
+      return json({ rooms: rows.filter(x => x && x.visibility === "public" && x.status === "lobby").sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 50) });
+    }
+    if (url.pathname === "/_registry/upsert" && request.method === "POST") {
+      let item; try { item = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+      const rows = await this.state.storage.get("publicRooms") || [];
+      const next = rows.filter(x => x.code !== String(item.code || ""));
+      if (item.visibility === "public" && item.status === "lobby" && item.code) next.push({
+        code: String(item.code).slice(0, 8), name: cleanName(item.name),
+        players: Math.max(0, Math.min(4, Number(item.players) || 0)),
+        maxPlayers: [2, 3, 4].includes(Number(item.maxPlayers)) ? Number(item.maxPlayers) : 4,
+        board: ["50", "200", "custom", "saved"].includes(item.board) ? item.board : "50",
+        difficulty: Math.max(1, Math.min(5, Number(item.difficulty) || 3)), locked: item.locked === true,
+        visibility: "public", status: "lobby", updatedAt: Date.now(), createdAt: Number(item.createdAt) || Date.now(),
+      });
+      await this.state.storage.put("publicRooms", next.slice(-100));
+      return json({ ok: true });
+    }
+    if (url.pathname === "/_registry/remove" && request.method === "POST") {
+      let item; try { item = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+      const code = String(item.code || "");
+      const rows = await this.state.storage.get("publicRooms") || [];
+      await this.state.storage.put("publicRooms", rows.filter(x => x.code !== code));
+      return json({ ok: true });
+    }
+
     if (url.pathname === "/create" && request.method === "POST") {
       let body;
       try { body = await request.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
@@ -102,14 +139,17 @@ export class Room {
         hostKey,
         status: "lobby",
         locked: false,
+        visibility: body.settings?.visibility === "public" ? "public" : "private",
         settings: defaults(body.settings),
         players: [{ id: String(body.clientId), name: cleanName(body.name), ready: true, connected: false }],
         spectators: [],
+        chat: [],
         snapshot: null,
         revision: 0,
         createdAt: Date.now(),
       };
       await this.state.storage.put("room", room);
+      await this.syncPublicIndex(room);
       await this.scheduleExpiry();
       return json({ hostKey }, 201);
     }
@@ -160,8 +200,9 @@ export class Room {
     this.state.acceptWebSocket(server);
     server.serializeAttachment({ clientId, name, isHost: !!claimsHost, isSpectator: !!spectator });
     await this.state.storage.put("room", room);
+    await this.syncPublicIndex(room);
     await this.scheduleExpiry();
-    this.send(server, { type: "room", room: this.publicRoom(room), snapshot: room.snapshot, revision: room.revision, isHost: !!claimsHost, isSpectator: !!spectator });
+    this.send(server, { type: "room", room: this.publicRoom(room), snapshot: room.snapshot, chat: room.chat || [], revision: room.revision, isHost: !!claimsHost, isSpectator: !!spectator });
     this.broadcast({ type: "room", room: this.publicRoom(room), revision: room.revision }, clientId);
     return new Response(null, { status: 101, webSocket: client });
   }
@@ -172,6 +213,7 @@ export class Room {
       hostId: room.hostId,
       status: room.status,
       locked: room.locked,
+      visibility: room.visibility || "private",
       settings: room.settings,
       // Never serialize reconnect secrets in the public room snapshot.
       players: room.players.map(({ id, name, ready, connected }) => ({ id, name, ready, connected })),
@@ -193,11 +235,27 @@ export class Room {
     }
   }
   async loadRoom() { return await this.state.storage.get("room"); }
+  async syncPublicIndex(room) {
+    try {
+      const id = this.env.ROOMS.idFromName("__snake_slop_public_registry__");
+      const stub = this.env.ROOMS.get(id);
+      const host = (room.players || []).find(p => p.id === room.hostId);
+      const path = room.visibility === "public" && room.status === "lobby" ? "/_registry/upsert" : "/_registry/remove";
+      const body = path.endsWith("upsert") ? {
+        code: room.code, name: host?.name || "Host", players: (room.players || []).length,
+        maxPlayers: room.settings?.maxPlayers, board: room.settings?.board,
+        difficulty: room.settings?.difficulty, visibility: room.visibility, status: room.status, locked: room.locked, createdAt: room.createdAt,
+      } : { code: room.code };
+      await stub.fetch("https://registry.internal" + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    } catch {}
+  }
   async scheduleExpiry() {
     // Idle private rooms expire after 12 hours; any connection/action refreshes the alarm.
     try { if (typeof this.state.storage.setAlarm === "function") await this.state.storage.setAlarm(Date.now() + 12 * 60 * 60 * 1000); } catch {}
   }
   async alarm() {
+    const room = await this.loadRoom();
+    if (room) await this.syncPublicIndex({ ...room, status: "expired" });
     await this.state.storage.delete("room");
     for (const ws of this.state.getWebSockets()) {
       this.send(ws, { type: "closed", reason: "expired" });
@@ -206,6 +264,7 @@ export class Room {
   }
   async saveAndBroadcast(room, message, exceptId = null) {
     await this.state.storage.put("room", room);
+    await this.syncPublicIndex(room);
     this.broadcast({ ...message, room: this.publicRoom(room), revision: room.revision, snapshot: room.status === "playing" ? room.snapshot : null }, exceptId);
   }
   attachment(ws) { try { return ws.deserializeAttachment() || {}; } catch { return {}; } }
@@ -255,6 +314,7 @@ export class Room {
       room.spectators = room.spectators.filter(p => p.id !== target);
       room.revision++;
       await this.state.storage.put("room", room);
+      await this.syncPublicIndex(room);
       for (const open of this.state.getWebSockets()) {
         const a = this.attachment(open);
         if (a.clientId === target) {
@@ -274,6 +334,7 @@ export class Room {
       room.settings = defaults(msg.settings || room.settings);
       room.revision++;
       await this.state.storage.put("room", room);
+      await this.syncPublicIndex(room);
       this.broadcast({ type: "started", snapshot: room.snapshot, revision: room.revision, fromId: actorId, room: this.publicRoom(room) });
       return;
     }
@@ -291,7 +352,26 @@ export class Room {
       this.skipDisconnected(room);
       room.revision++;
       await this.state.storage.put("room", room);
+      await this.syncPublicIndex(room);
       this.broadcast({ type: "snapshot", snapshot: room.snapshot, event: safeEvent(msg.event), fromId: actorId, revision: room.revision, room: this.publicRoom(room) });
+      return;
+    }
+    if (msg.type === "chat") {
+      if (!inRoom) return;
+      const text = cleanChatText(msg.text);
+      if (!text) return;
+      const now = Date.now();
+      const rateKey = "chat-rate:" + actorId;
+      const last = Number(await this.state.storage.get(rateKey)) || 0;
+      if (now - last < 450) return this.fail(ws, "Please wait a moment before sending another message");
+      await this.state.storage.put(rateKey, now);
+      const message = { id: crypto.randomUUID(), senderId: actorId, name: cleanName(att.name), text, at: now };
+      room.chat = Array.isArray(room.chat) ? room.chat : [];
+      room.chat.push(message);
+      room.chat = room.chat.slice(-50);
+      await this.state.storage.put("room", room);
+      this.broadcast({ type: "chat", message }, actorId);
+      this.send(ws, { type: "chat", message });
       return;
     }
     if (msg.type === "reaction") {
@@ -314,6 +394,7 @@ export class Room {
     if (msg.type === "leave") {
       if (isHost && (room.status === "lobby" || room.status === "finished")) {
         for (const open of this.state.getWebSockets()) this.send(open, { type: "closed" });
+        await this.syncPublicIndex({ ...room, status: "closed" });
         await this.state.storage.delete("room");
         for (const open of this.state.getWebSockets()) { try { open.close(1000, "Room closed"); } catch {} }
         return;
