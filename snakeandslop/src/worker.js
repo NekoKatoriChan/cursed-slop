@@ -1,4 +1,28 @@
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+// Stable card keys are resolved to the current CD indexes by the frontend.
+// The server only accepts Gray-tier starter cards and stores the key per player.
+const STARTER_CARD_INDEX = Object.freeze({
+  "gray-small-step": 30,
+  "gray-loose-coin": 31,
+  "gray-pocket-pouch": 32,
+  "gray-calm-die": 33,
+  "gray-rubber-sole": 34,
+  "gray-first-aid": 35,
+  "gray-paper-map": 36,
+  "gray-chalk-mark": 37,
+  "gray-warmup": 38,
+  "gray-lucky-ticket": 39,
+  "gray-ladder-coupon": 40,
+  "gray-portal-ward": 41,
+  "gray-water-flask": 42,
+  "gray-spare-rope": 43,
+  "gray-coin-toss": 44,
+  "gray-last-place-meal": 45,
+  "gray-soft-landing": 46,
+  "gray-spare-stamina": 47,
+  "gray-income-stamp": 48,
+  "gray-good-luck": 49,
+});
 
 function randomCode(length = 7) {
   const bytes = crypto.getRandomValues(new Uint8Array(length));
@@ -141,7 +165,7 @@ export class Room {
         locked: false,
         visibility: body.settings?.visibility === "public" ? "public" : "private",
         settings: defaults(body.settings),
-        players: [{ id: String(body.clientId), name: cleanName(body.name), ready: true, connected: false }],
+        players: [{ id: String(body.clientId), name: cleanName(body.name), ready: true, connected: false, starterCard: null }],
         spectators: [],
         chat: [],
         snapshot: null,
@@ -183,7 +207,7 @@ export class Room {
       if (room.locked) return new Response("Room is locked", { status: 403 });
       if (room.status === "lobby") {
         if (room.players.length >= room.settings.maxPlayers) return new Response("Room full", { status: 409 });
-        player = { id: clientId, name, ready: false, connected: false, resumeKey };
+        player = { id: clientId, name, ready: false, connected: false, resumeKey, starterCard: null };
         room.players.push(player);
       } else {
         if (!room.settings.allowSpectators) return new Response("Spectators disabled", { status: 403 });
@@ -216,7 +240,7 @@ export class Room {
       visibility: room.visibility || "private",
       settings: room.settings,
       // Never serialize reconnect secrets in the public room snapshot.
-      players: room.players.map(({ id, name, ready, connected }) => ({ id, name, ready, connected })),
+      players: room.players.map(({ id, name, ready, connected, starterCard }) => ({ id, name, ready, connected, starterCard: STARTER_CARD_INDEX[starterCard] === undefined ? null : starterCard })),
       spectators: room.spectators.map(({ id, name, connected }) => ({ id, name, connected })),
       revision: room.revision,
     };
@@ -290,11 +314,26 @@ export class Room {
       await this.saveAndBroadcast(room, { type: "room" });
       return;
     }
+    if (msg.type === "starter") {
+      if (room.status !== "lobby" || playerIndex < 0) return this.fail(ws, "Only room members can choose a starter card");
+      const cardKey = msg.cardKey == null || msg.cardKey === "" ? null : String(msg.cardKey);
+      if (cardKey !== null && !Object.prototype.hasOwnProperty.call(STARTER_CARD_INDEX, cardKey)) {
+        return this.fail(ws, "Invalid Gray starter card");
+      }
+      if (cardKey !== null && room.settings.allowCards === false) return this.fail(ws, "Cards are disabled for this room");
+      // Deliberately ignore any target/player ID sent by the client: a member can only
+      // change the starter selection attached to their authenticated WebSocket identity.
+      room.players[playerIndex].starterCard = cardKey;
+      room.revision++;
+      await this.saveAndBroadcast(room, { type: "room" });
+      return;
+    }
     if (msg.type === "settings") {
       if (!isHost || room.status !== "lobby") return this.fail(ws, "Only the host can edit lobby rules");
       const next = defaults(msg.settings || {});
       if (room.players.length > next.maxPlayers) return this.fail(ws, "Player limit is lower than current room size");
       room.settings = next;
+      if (next.allowCards === false) room.players = room.players.map(player => ({ ...player, starterCard: null }));
       room.revision++;
       await this.saveAndBroadcast(room, { type: "room" });
       return;
@@ -329,6 +368,15 @@ export class Room {
       if (!isHost || room.status !== "lobby") return this.fail(ws, "Only the host can start the game");
       if (room.players.length < 2 || room.players.some(p => !p.connected || !p.ready)) return this.fail(ws, "All players must be connected and ready");
       if (!validSnapshot(msg.snapshot, room.players.length)) return this.fail(ws, "Invalid initial game state");
+      const initialPlayers = msg.snapshot.game.p;
+      for (let i = 0; i < room.players.length; i++) {
+        const key = room.settings.allowCards === false ? null : (room.players[i].starterCard || null);
+        const expectedId = key === null ? null : STARTER_CARD_INDEX[key];
+        const actualId = initialPlayers[i]?.starterCard ?? null;
+        if (actualId !== expectedId || (expectedId !== null && !initialPlayers[i].cards.includes(expectedId))) {
+          return this.fail(ws, "Starter loadout does not match each player's saved choice");
+        }
+      }
       room.status = "playing";
       room.snapshot = sanitizeSnapshot(msg.snapshot);
       room.settings = defaults(msg.settings || room.settings);
@@ -424,7 +472,7 @@ export class Room {
     while (safety-- > 0 && room.players[game.cur] && !room.players[game.cur].connected) {
       const missed = room.players[game.cur];
       game.cur = (game.cur + 1) % room.players.length;
-      room.snapshot.log = [...(room.snapshot.log || []), `${missed.name} mất kết nối — bỏ lượt.`].slice(-3);
+      room.snapshot.log = [...(room.snapshot.log || []), `${missed.name} disconnected; their turn was skipped.`].slice(-3);
     }
   }
 
@@ -487,13 +535,32 @@ function validSnapshot(s, playerCount) {
 function sanitizeSnapshot(s) {
   const snapshot = JSON.parse(JSON.stringify(s));
   snapshot.game.busy = 0;
-  snapshot.log = Array.isArray(snapshot.log) ? snapshot.log.slice(-3).map(x => String(x).slice(0, 200)) : [];
+  snapshot.log = Array.isArray(snapshot.log) ? snapshot.log.slice(-6).map(x => String(x).slice(0, 200)) : [];
   return snapshot;
+}
+function safeCardKey(value) {
+  const key = String(value || "").slice(0, 40);
+  return /^[a-z0-9-]{1,40}$/i.test(key) ? key : "";
 }
 function safeEvent(event) {
   if (!event || typeof event !== "object") return null;
-  if (event.type === "roll") return { type: "roll", dice: Array.isArray(event.dice) ? event.dice.slice(0, 3).filter(n => Number.isInteger(n) && n >= 1 && n <= 6) : [] };
-  if (event.type === "card") return { type: "card", key: String(event.key || "").slice(0, 40) };
+  if (event.type === "roll") {
+    const route = Array.isArray(event.route)
+      ? event.route.slice(0, 220).filter(pos => Number.isInteger(pos) && pos >= 0 && pos < 200)
+      : [];
+    const effectKey = safeCardKey(event.effectKey);
+    return {
+      type: "roll",
+      // Custom rooms may use 8-, 10- or 12-sided dice; do not truncate valid results to six.
+      dice: Array.isArray(event.dice) ? event.dice.slice(0, 3).filter(n => Number.isInteger(n) && n >= 1 && n <= 12) : [],
+      route,
+      ...(effectKey ? { effectKey } : {}),
+    };
+  }
+  if (event.type === "card") {
+    const key = safeCardKey(event.key);
+    return key ? { type: "card", key } : null;
+  }
   if (event.type === "shop") return { type: "shop" };
   return null;
 }
