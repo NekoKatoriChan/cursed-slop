@@ -35,7 +35,7 @@ i{font-style:normal}.dot{width:10px;height:10px;border-radius:50%;display:inline
 .tag{display:inline-block;font-size:10px;padding:0 6px;border-radius:99px;background:var(--bd);margin:2px 3px 0 0}
 .dock{flex:none;display:flex;flex-direction:column;gap:8px;padding-bottom:calc(2px + env(safe-area-inset-bottom,0px))}
 .row{display:flex;gap:8px;align-items:center}.row>button{flex:1}
-#dc{width:min(48%,300px);height:48px;flex:none;max-width:300px}
+#dc{display:block;width:min(48%,300px);height:auto;aspect-ratio:30/7;align-self:center;flex:none;max-width:300px;min-width:0;overflow:visible}
 #log{flex:1;min-width:0;min-height:48px;max-height:72px;overflow:auto;display:flex;flex-direction:column;gap:3px;padding:5px 8px;border:1px solid var(--bd);border-radius:10px;background:var(--pn);font-size:11px;line-height:1.3;color:var(--fg);scrollbar-width:thin;overscroll-behavior:contain}
 .game-log-line{display:grid;grid-template-columns:46px minmax(0,1fr);gap:6px;padding:2px 0;border-bottom:1px solid color-mix(in srgb,var(--bd) 65%,transparent);overflow-wrap:anywhere}
 .game-log-line:last-child{border-bottom:0}
@@ -43,7 +43,7 @@ i{font-style:normal}.dot{width:10px;height:10px;border-radius:50%;display:inline
 .log-turn .game-log-tag{color:#4776cf}.log-card .game-log-tag{color:#9368d8}.log-shop .game-log-tag{color:#b18b32}.log-event .game-log-tag{color:#288a63}.log-system .game-log-tag{color:#bd5e5e}
 .game-log-empty{color:var(--mut);font-size:10px;padding:4px 0}
 .dock .row:first-child{align-items:stretch}
-@media(max-width:380px){#dc{width:44%;height:44px}#log{max-height:68px;padding:4px 6px;font-size:10px}.game-log-line{grid-template-columns:39px minmax(0,1fr);gap:4px}.game-log-tag{font-size:8px}}
+@media(max-width:380px){#dc{width:44%;align-self:center;flex:none}#log{max-height:68px;min-height:40px;padding:4px 6px;font-size:10px}.game-log-line{grid-template-columns:39px minmax(0,1fr);gap:4px}.game-log-tag{font-size:8px}}
 .dev-shard-tools{border:1px solid #6b4ce1;border-radius:12px;padding:9px;background:linear-gradient(135deg,rgba(84,47,150,.12),rgba(12,12,25,.08));display:flex;flex-direction:column;gap:7px}.dev-shard-tools[hidden]{display:none!important}#devShardStatus{font-size:12px;font-weight:750;letter-spacing:.035em;color:#bca3ff}.dev-shard-tools .row{gap:7px}.dev-shard-tools .row button{min-height:38px;font-size:12px;white-space:normal}
 #es{flex:none;font-size:12.5px;color:var(--mut);white-space:pre-line;min-height:2.6em;line-height:1.3}
 .bar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.bar button{flex:none}
@@ -1275,9 +1275,8 @@ function animate(i,route,done){if(route.length<2){an=null;paint();return done()}
 (function f(now){const v=Math.min((now-t0)/dur,1)*segs,s=Math.min(v|0,segs-1),q=v-s,a=ctr(route[s]),b=ctr(route[s+1]);an={i,pt:[a[0]+(b[0]-a[0])*q,a[1]+(b[1]-a[1])*q]};paint();
 if(v<segs)requestAnimationFrame(f);else{an=null;paint();done()}})(t0)}
 const PIPS=[0,[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]],dcx=$('#dc').getContext('2d');
-function dice(v){const c=dcx;c.clearRect(0,0,300,70);const n=v.length,d=56,g=14,x0=(300-(n*d+(n-1)*g))/2;
-v.forEach((a,i)=>{const x=x0+i*(d+g),y=7,gr=c.createLinearGradient(x,y,x+d,y+d);gr.addColorStop(0,'#fff');gr.addColorStop(1,'#d6d6e0');c.fillStyle=gr;c.strokeStyle='#556';c.lineWidth=2;
-c.beginPath();c.roundRect(x,y,d,d,10);c.fill();c.stroke();c.fillStyle=a==1?'#e53935':'#223';if(a>=1&&a<=6)PIPS[a].forEach(k=>{c.beginPath();c.arc(x+d*(.22+.28*(k%3)),y+d*(.22+.28*(k/3|0)),4.3,0,7);c.fill()});else{c.font='700 18px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText(String(a),x+d/2,y+d/2)}})}
+function dice(v){const c=dcx;c.clearRect(0,0,300,70);const n=v.length,d=Math.min(56,(270-(n-1)*12)/n),g=n>1?12:0,x0=(300-(n*d+(n-1)*g))/2,y=(70-d)/2,r=Math.max(5,d*.17);
+v.forEach((a,i)=>{const x=x0+i*(d+g),gr=c.createLinearGradient(x,y,x+d,y+d);gr.addColorStop(0,'#fff');gr.addColorStop(.58,'#f0f1f6');gr.addColorStop(1,'#c9ccd8');c.save();c.shadowColor='rgba(0,0,0,.24)';c.shadowBlur=5;c.shadowOffsetY=2;c.fillStyle=gr;c.strokeStyle='#687184';c.lineWidth=1.7;c.beginPath();c.roundRect(x,y,d,d,Math.max(7,d*.19));c.fill();c.stroke();c.shadowColor='transparent';c.shadowBlur=0;c.shadowOffsetY=0;c.strokeStyle='rgba(255,255,255,.9)';c.lineWidth=1;c.beginPath();c.roundRect(x+2,y+2,d-4,d-4,Math.max(5,d*.15));c.stroke();c.fillStyle=a===1?'#e53935':'#273044';if(a>=1&&a<=6)PIPS[a].forEach(k=>{c.beginPath();c.arc(x+d*(.22+.28*(k%3)),y+d*(.22+.28*(k/3|0)),Math.max(2.2,d*.077),0,Math.PI*2);c.fill()});else{c.font='800 '+Math.max(12,d*.34)+'px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(String(a),x+d/2,y+d/2)}c.restore()})}
 function rollDice(r,done){let n=0;const iv=setInterval(()=>{dice(r.map(()=>1+Math.random()*6|0));if(++n>11){clearInterval(iv);dice(r);done()}},50)}
 /* ---------- screens & game ---------- */
 function show(s){mode=s;document.body.dataset.s=s;cv.style.touchAction='pan-y';['m','g','e'].forEach(k=>$('#'+k).classList.toggle('on',k==s));
