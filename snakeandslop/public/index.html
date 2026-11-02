@@ -533,7 +533,7 @@ const APP_TEXT_KUKU=[
  ['Độ khó vùng cuối','ác mộng của nô lệ'],['End-zone difficulty','ác mộng của nô lệ'],
  ['Độ hỗn loạn bản đồ','tỉ lệ sợ hãi'],['Độ hỗn loạn','tỉ lệ sợ hãi'],['Map chaos','tỉ lệ sợ hãi'],
  ['Bộ thẻ khởi đầu','kỹ năng sinh tồn'],['BỘ THẺ KHỞI ĐẦU','kỹ năng sinh tồn'],['Starter cards','kỹ năng sinh tồn'],
- ['Bắt đầu ván','Sinh tồn'],['Start game','Sinh tồn'],
+ ['Bắt đầu ván','Sinh tồn'],['Bắt đầu','Sinh tồn'],['Start game','Sinh tồn'],
  ['Chơi online','sinh tồn online'],['Chơi trực tuyến','sinh tồn online'],['Online play','sinh tồn online'],
  ['Biệt danh','Thông tin nô lệ'],['Nickname','Thông tin nô lệ'],
  ['Loại phòng','Sân chơi'],['Room type','Sân chơi'],
@@ -554,9 +554,17 @@ function translateAppText(value){
   // Every card name and full card description has one intentionally silly translation.
   if(typeof CD!=='undefined'){
    for(const card of CD){
-    if(card?.d&&translated.includes(card.d))return'gugugaga';
-    if(card?.n&&translated===card.n)return'gugugaga';
-    if(card?.n&&translated.includes(card.n))translated=translated.split(card.n).join('gugugaga');
+    const lower=translated.toLocaleLowerCase();
+    if(card?.d&&lower.includes(String(card.d).toLocaleLowerCase()))return'gugugaga';
+    if(card?.n){
+     const name=String(card.n).toLocaleLowerCase();
+     let at=lower.indexOf(name);
+     if(at>=0&&lower===name)return'gugugaga';
+     while(at>=0){
+      translated=translated.slice(0,at)+'gugugaga'+translated.slice(at+card.n.length);
+      at=translated.toLocaleLowerCase().indexOf(name,at+'gugugaga'.length);
+     }
+    }
    }
   }
   const pairs=APP_TEXT_KUKU.slice().sort((a,b)=>b[0].length-a[0].length);
