@@ -562,8 +562,8 @@ function translateAppText(value){
   const pairs=APP_TEXT_KUKU.slice().sort((a,b)=>b[0].length-a[0].length);
   for(const [from,to] of pairs){
    if(from==='Ô'){
-    translated=translated.replace(/(^|[^\\p{L}\\p{N}_])Ô(?=$|[^\\p{L}\\p{N}_])/giu,(_,prefix)=>prefix+to);
-    translated=translated.replace(/(^|[^\\p{L}\\p{N}_])ô(?=$|[^\\p{L}\\p{N}_])/giu,(_,prefix)=>prefix+to);
+    translated=translated.replace(/(^|[^A-Za-z0-9_])Ô(?=$|[^A-Za-z0-9_])/giu,(_,prefix)=>prefix+to);
+    translated=translated.replace(/(^|[^A-Za-z0-9_])ô(?=$|[^A-Za-z0-9_])/giu,(_,prefix)=>prefix+to);
     continue;
    }
    for(const variant of new Set([from,from.toUpperCase(),from.toLowerCase()]))translated=translated.split(variant).join(to);
