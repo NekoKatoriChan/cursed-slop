@@ -551,7 +551,7 @@ function translateAppText(value){
  const source=String(value??'');
  if(appLanguage==='kuku'){
   let translated=source;
-  // Card labels and full descriptions intentionally collapse to the same Kukukaka word.
+  // Every card name and full card description has one intentionally silly translation.
   if(typeof CD!=='undefined'){
    for(const card of CD){
     if(card?.d&&translated.includes(card.d))return'gugugaga';
@@ -561,14 +561,12 @@ function translateAppText(value){
   }
   const pairs=APP_TEXT_KUKU.slice().sort((a,b)=>b[0].length-a[0].length);
   for(const [from,to] of pairs){
-   if(from==='Ô'||from==='Tile'){
-    const re=from==='Ô'?/(^|[^\\p{L}\\p{N}_])Ô(?=$|[^\\p{L}\\p{N}_])/giu:/\\bTile\\b/giu;
-    translated=translated.replace(re,(_,prefix='')=>prefix+to);
-   }else{
-    const escaped=from.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\function translateAppText(value){
- const source=String(value??'');');
-    translated=translated.replace(new RegExp(escaped,'gi'),to);
+   if(from==='Ô'){
+    translated=translated.replace(/(^|[^\\p{L}\\p{N}_])Ô(?=$|[^\\p{L}\\p{N}_])/giu,(_,prefix)=>prefix+to);
+    translated=translated.replace(/(^|[^\\p{L}\\p{N}_])ô(?=$|[^\\p{L}\\p{N}_])/giu,(_,prefix)=>prefix+to);
+    continue;
    }
+   for(const variant of new Set([from,from.toUpperCase(),from.toLowerCase()]))translated=translated.split(variant).join(to);
   }
   return translated;
  }
