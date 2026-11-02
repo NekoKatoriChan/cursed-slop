@@ -205,6 +205,14 @@ assert.equal(kukuSandbox.kukuTranslate('50 ô'), '50 Ổ nô lệ', 'Kukukaka st
 assert.equal(kukuSandbox.kukuTranslate('Sahur'), 'gugugaga', 'Kukukaka card title translates');
 assert.equal(kukuSandbox.kukuTranslate('Hố Đen'), 'gugugaga', 'Kukukaka card title matching ignores case');
 assert.equal(kukuSandbox.kukuTranslate('wooden summon description'), 'gugugaga', 'Kukukaka card description translates');
+assert.equal(kukuSandbox.kukuTranslate('Settings'), 'gugugaga', 'unmapped English UI text falls back to gugugaga');
+assert.equal(kukuSandbox.kukuTranslate('Quality'), 'gugugaga', 'unmapped settings labels fall back to gugugaga');
+assert.equal(kukuSandbox.kukuTranslate('Nhập keycode để mở công cụ kiểm thử.'), 'gugugaga', 'unmapped Vietnamese dialog text falls back to gugugaga');
+assert.equal(kukuSandbox.kukuTranslate('Chưa có hoạt động.'), 'gugugaga', 'unmapped dynamic empty states fall back to gugugaga');
+assert.equal(kukuSandbox.kukuTranslate('RẮN RÁC · MULTIPLAYER'), 'gugugaga', 'unmapped brand and overlay labels fall back to gugugaga');
+assert.equal(kukuSandbox.kukuTranslate('Kukukaka'), 'gugugaga', 'the language name itself follows the fallback rule');
+assert.equal(kukuSandbox.kukuTranslate('Số người chơi: 4'), 'nô lệ: 4', 'existing glossary translations remain intact around dynamic values');
+assert.match(html, /document\.title=appLanguage==='en'\?'Snake Slop':appLanguage==='kuku'\?'gugugaga':'Rắn Rác'/, 'browser title uses gugugaga in Kukukaka mode');
 assert.match(html, /key:'masked-knight'/, 'masked knight red card is present');
 assert.ok(html.indexOf('CD.push(...EXTRA_CARDS);') < html.indexOf("key:'masked-knight'"), 'new cards are appended after all 100 legacy card IDs');
 assert.match(html, /key:'sahur'/, 'Sahur yellow card is present');

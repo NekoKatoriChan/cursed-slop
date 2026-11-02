@@ -575,6 +575,8 @@ function translateAppText(value){
    }
    for(const variant of new Set([from,from.toUpperCase(),from.toLowerCase()]))translated=translated.split(variant).join(to);
   }
+  // Preserve the requested glossary; any remaining unmapped UI text uses the fallback word.
+  if(translated===source&&/[A-Za-zÀ-ỹ]/u.test(source))return'gugugaga';
   return translated;
  }
  const brandToken='\uE000SNAKERACCBRAND\uE001';
@@ -608,7 +610,7 @@ function localizeNode(root){
 }
 function applyLanguage(){
  document.documentElement.lang=appLanguage;
- document.title=appLanguage==='en'?'Snake Slop':'Rắn Rác';
+ document.title=appLanguage==='en'?'Snake Slop':appLanguage==='kuku'?'gugugaga':'Rắn Rác';
  const switcher=document.querySelector('#languageSwitch'),settings=document.querySelector('#settingsLanguage');if(switcher)switcher.value=appLanguage;if(settings)settings.value=appLanguage;
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const n=walker.currentNode;if(!textOrigins.has(n))textOrigins.set(n,n.nodeValue);const value=translateAppText(textOrigins.get(n));if(n.nodeValue!==value)n.nodeValue=value;}
  document.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el=>{for(const attr of ['placeholder','title','aria-label']){if(!el.hasAttribute(attr))continue;let saved=attributeOrigins.get(el);if(!saved){saved={};attributeOrigins.set(el,saved)}if(!(attr in saved))saved[attr]=el.getAttribute(attr);const value=translateAppText(saved[attr]);if(el.getAttribute(attr)!==value)el.setAttribute(attr,value)}});
