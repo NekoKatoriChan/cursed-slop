@@ -212,6 +212,12 @@ assert.equal(kukuSandbox.kukuTranslate('Chưa có hoạt động.'), 'gugugaga',
 assert.equal(kukuSandbox.kukuTranslate('RẮN RÁC · MULTIPLAYER'), 'gugugaga', 'unmapped brand and overlay labels fall back to gugugaga');
 assert.equal(kukuSandbox.kukuTranslate('Kukukaka'), 'gugugaga', 'the language name itself follows the fallback rule');
 assert.equal(kukuSandbox.kukuTranslate('Số người chơi: 4'), 'nô lệ: 4', 'existing glossary translations remain intact around dynamic values');
+assert.match(html, /function slowEffectAnimations\(el\)/, 'card cinematics share a slowdown helper');
+assert.match(html, /animation\.playbackRate=\.72/, 'card cinematic CSS animations play at 72 percent speed');
+assert.match(html, /key==='black-hole'\?7200:key==='cataclysm'\?4050:5150\)\*1\.4/, 'black cinematic canvas timeline is lengthened by 40 percent');
+assert.match(html, /reduced\?1450:4760/, 'red card cinematic stays visible longer');
+assert.match(html, /reduced\?1350:5040/, 'Sahur cinematic stays visible longer');
+
 assert.match(html, /document\.title=appLanguage==='en'\?'Snake Slop':appLanguage==='kuku'\?'gugugaga':'Rắn Rác'/, 'browser title uses gugugaga in Kukukaka mode');
 assert.match(html, /key:'masked-knight'/, 'masked knight red card is present');
 assert.ok(html.indexOf('CD.push(...EXTRA_CARDS);') < html.indexOf("key:'masked-knight'"), 'new cards are appended after all 100 legacy card IDs');
