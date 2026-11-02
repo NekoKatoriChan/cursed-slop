@@ -194,6 +194,7 @@ assert.equal(kukuSandbox.kukuTranslate('50 ô'), '50 Ổ nô lệ', 'Kukukaka st
 assert.equal(kukuSandbox.kukuTranslate('Sahur'), 'gugugaga', 'Kukukaka card title translates');
 assert.equal(kukuSandbox.kukuTranslate('wooden summon description'), 'gugugaga', 'Kukukaka card description translates');
 assert.match(html, /key:'masked-knight'/, 'masked knight red card is present');
+assert.ok(html.indexOf('CD.push(...EXTRA_CARDS);') < html.indexOf("key:'masked-knight'"), 'new cards are appended after all 100 legacy card IDs');
 assert.match(html, /key:'sahur'/, 'Sahur yellow card is present');
 assert.match(html, /key:'tornado'/, 'permanent Tornado black card is present');
 assert.match(html, /key:'snake-form'/, 'three-turn snake form black card is present');
