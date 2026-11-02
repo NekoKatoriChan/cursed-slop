@@ -213,7 +213,7 @@ assert.match(html, /key:'snake-form'/, 'three-turn snake form black card is pres
 assert.match(html, /@media\(orientation:landscape\)/, 'landscape mobile layout is present');
 assert.match(html, /is-tornado-shuffling/, 'Tornado map animation is present');
 const effectFunctionsStart = html.indexOf('function playTornadoBoardAnimation(){');
-const effectFunctionsEnd = html.indexOf('\\nconst SY=', effectFunctionsStart);
+const effectFunctionsEnd = html.indexOf('\nconst SY=', effectFunctionsStart);
 assert.ok(effectFunctionsStart >= 0 && effectFunctionsEnd > effectFunctionsStart, 'Tornado and duration functions are present');
 const effectBoard = { n: 5, r: 5, sp: Array(25).fill(0), sl: Array(25).fill(0), sn: [[20, 6], [14, 4]], la: [[2, 12], [8, 19]], po: [[5, 17]], cost: 1 };
 effectBoard.sp[0] = 2; effectBoard.sp[24] = 3; effectBoard.sl[0] = 1; effectBoard.sl[24] = 1;
@@ -222,7 +222,7 @@ const effectGame = { t: 0, tornado: true, snakeForm: { owner: 1, turnsLeft: 3 },
 let tornadoAnimations = 0;
 const effectSandbox = { M: effectBoard, G: effectGame, SZ: () => 25, LAST: () => 24, dirty: 0, gj: '', migrate() {}, storm() {}, $: () => ({ classList: { remove() {}, add() { tornadoAnimations++; } }, get offsetWidth() { return 1; } }), window: { setTimeout() {} } };
 vm.createContext(effectSandbox);
-vm.runInContext(html.slice(effectFunctionsStart, effectFunctionsEnd) + '\\nthis.shuffleTornadoMap = shuffleTornadoMap; this.advanceGlobalTurn = advanceGlobalTurn;', effectSandbox);
+vm.runInContext(html.slice(effectFunctionsStart, effectFunctionsEnd) + '\nthis.shuffleTornadoMap = shuffleTornadoMap; this.advanceGlobalTurn = advanceGlobalTurn;', effectSandbox);
 const originalCells = { sp: effectBoard.sp.slice().sort((a,b)=>a-b).join(','), sl: effectBoard.sl.slice().sort((a,b)=>a-b).join(','), p: JSON.stringify(effectGame.p.map(player => player.pos)), endpoints: [effectBoard.sp[0],effectBoard.sp[24],effectBoard.sl[0],effectBoard.sl[24]] };
 effectSandbox.shuffleTornadoMap([]);
 assert.equal(effectBoard.sp.slice().sort((a,b)=>a-b).join(','), originalCells.sp, 'Tornado permutes special tiles without losing them');
