@@ -420,7 +420,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 @keyframes tornado-wind{0%{opacity:0;transform:translateX(-100vw)}35%{opacity:1}100%{opacity:0;transform:translateX(100vw)}}
 /* Summoning cinematics */
 .red-masked-knight .red-cine-core{border:2px solid rgba(255,225,157,.9);background:radial-gradient(circle,#fff7cf 0 4%,#f0c65f 11%,#9c243e 32%,rgba(22,4,18,.25) 68%,transparent 74%);box-shadow:0 0 30px #f6ce73,0 0 90px rgba(200,40,70,.6)}
-.red-masked-knight .red-cine-core:before{content:"🛡️";position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(58px,19vw,110px);filter:drop-shadow(0 0 16px #ffe39a);animation:knight-charge 1.45s cubic-bezier(.15,.7,.2,1) both}
+.red-masked-knight .red-cine-core:before{content:"🎭";position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(58px,19vw,110px);filter:drop-shadow(0 0 16px #ffe39a);animation:knight-charge 1.45s cubic-bezier(.15,.7,.2,1) both}
 .red-masked-knight .red-cine-core:after{content:"✨";position:absolute;right:-20%;top:18%;font-size:clamp(35px,12vw,72px);transform-origin:20% 80%;animation:knight-spark .9s .35s ease-in-out both}
 @keyframes knight-charge{0%{opacity:0;transform:translateX(-75vw) scale(.5)}55%{opacity:1;transform:translateX(8px) scale(1.08)}100%{opacity:1;transform:translateX(0) scale(1)}}
 @keyframes knight-spark{0%{opacity:0;transform:rotate(-90deg) scale(.4)}55%{opacity:1;transform:rotate(28deg) scale(1.12)}100%{opacity:1;transform:rotate(0) scale(1)}}
@@ -531,7 +531,7 @@ const APP_TEXT_KUKU=[
  ['Số người chơi','nô lệ'],['Players','nô lệ'],
  ['Bản đồ','nơi sinh tồn'],['Board','nơi sinh tồn'],
  ['Độ khó vùng cuối','ác mộng của nô lệ'],['End-zone difficulty','ác mộng của nô lệ'],
- ['Độ hỗn loạn bản đồ','tỉ lệ sợ hãi'],['Độ hỗn loạn','tỉ lệ sợ hãi'],['Map chaos','tỉ lệ sợ hãi'],
+ ['Độ hỗn loạn bản đồ','tỉ lệ sợ hãi'],['Độ hỗn loạn','tỉ lệ sợ hãi'],['Hỗn loạn','tỉ lệ sợ hãi'],['Map chaos','tỉ lệ sợ hãi'],['Chaos','tỉ lệ sợ hãi'],
  ['Bộ thẻ khởi đầu','kỹ năng sinh tồn'],['BỘ THẺ KHỞI ĐẦU','kỹ năng sinh tồn'],['Starter cards','kỹ năng sinh tồn'],
  ['Bắt đầu ván','Sinh tồn'],['Bắt đầu','Sinh tồn'],['Start game','Sinh tồn'],
  ['Chơi online','sinh tồn online'],['Chơi trực tuyến','sinh tồn online'],['Online play','sinh tồn online'],
@@ -570,8 +570,7 @@ function translateAppText(value){
   const pairs=APP_TEXT_KUKU.slice().sort((a,b)=>b[0].length-a[0].length);
   for(const [from,to] of pairs){
    if(from==='Ô'){
-    translated=translated.replace(/(^|[^A-Za-z0-9_])Ô(?=$|[^A-Za-z0-9_])/giu,(_,prefix)=>prefix+to);
-    translated=translated.replace(/(^|[^A-Za-z0-9_])ô(?=$|[^A-Za-z0-9_])/giu,(_,prefix)=>prefix+to);
+    translated=translated.replace(/(^|[\\s.,;:!?()])Ô(?=$|[\\s.,;:!?()])/giu,(_,prefix)=>prefix+to);
     continue;
    }
    for(const variant of new Set([from,from.toUpperCase(),from.toLowerCase()]))translated=translated.split(variant).join(to);
