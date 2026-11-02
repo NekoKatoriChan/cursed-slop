@@ -570,7 +570,7 @@ function translateAppText(value){
   const pairs=APP_TEXT_KUKU.slice().sort((a,b)=>b[0].length-a[0].length);
   for(const [from,to] of pairs){
    if(from==='Ô'){
-    translated=translated.replace(/(^|[\\s.,;:!?()])Ô(?=$|[\\s.,;:!?()])/giu,(_,prefix)=>prefix+to);
+    translated=translated.replace(/(^|[\s.,;:!?()])Ô(?=$|[\s.,;:!?()])/giu,(_,prefix)=>prefix+to);
     continue;
    }
    for(const variant of new Set([from,from.toUpperCase(),from.toLowerCase()]))translated=translated.split(variant).join(to);
