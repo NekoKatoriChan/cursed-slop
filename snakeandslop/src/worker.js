@@ -511,6 +511,11 @@ function validSnapshot(s, playerCount) {
       if (!Array.isArray(p.cards) || p.cards.some(i => !Number.isInteger(i) || i < 0 || i > 1000)) return false;
     }
     if (!Number.isInteger(g.win) || g.win < -1 || g.win >= playerCount) return false;
+    if (g.tornado !== undefined && typeof g.tornado !== "boolean") return false;
+    if (g.snakeForm !== undefined && g.snakeForm !== null) {
+      if (!Number.isInteger(g.snakeForm.owner) || g.snakeForm.owner < 0 || g.snakeForm.owner >= playerCount) return false;
+      if (!Number.isInteger(g.snakeForm.turnsLeft) || g.snakeForm.turnsLeft < 1 || g.snakeForm.turnsLeft > 3) return false;
+    }
     if (g.shards !== undefined) {
       if (!Array.isArray(g.shards) || g.shards.length !== 3) return false;
       const shardPositions = new Set();
