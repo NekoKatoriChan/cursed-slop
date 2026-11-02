@@ -212,7 +212,7 @@ assert.match(html, /key:'tornado'/, 'permanent Tornado black card is present');
 assert.match(html, /key:'snake-form'/, 'three-turn snake form black card is present');
 const appendedCardsStart = html.indexOf('CD.push(...[');
 const appendedCardsArrayStart = html.indexOf('[', appendedCardsStart);
-const appendedCardsEnd = html.indexOf('\\n]);', appendedCardsArrayStart);
+const appendedCardsEnd = html.indexOf('\n]);', appendedCardsArrayStart);
 assert.ok(appendedCardsStart >= 0 && appendedCardsArrayStart > appendedCardsStart && appendedCardsEnd > appendedCardsArrayStart, 'new card definitions are appended after the legacy deck');
 const cardPlayers = [{pos:10,gold:40,cards:[]},{pos:35,gold:0,cards:[]},{pos:20,gold:0,cards:[]}];
 const cardGame = {p:cardPlayers};
