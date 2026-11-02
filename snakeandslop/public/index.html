@@ -856,10 +856,10 @@ const EXTRA_CARDS=[
 CD.push(...EXTRA_CARDS);
 // Keep every pre-existing card ID stable; new cards are appended after the 100-card deck.
 CD.push(...[
-{key:'masked-knight',n:'Hiệp sĩ đeo mặt nạ',tier:'red',d:'Triệu hồi hiệp sĩ: người đang dẫn đầu tiến thêm 30% chiều dài bản đồ.',ok:p=>p.gold>30?'':'Cần hơn 30 vàng',use:(p,ms)=>{const o=G.p.reduce((a,b)=>!a||b.pos>a.pos?b:a,null);if(!o){ms.push('Không có người chơi để hiệp sĩ hộ tống');return}const distance=Math.max(1,Math.floor(SZ()*.3)),before=o.pos;o.pos=Math.max(0,o.pos-distance);ms.push('Hiệp sĩ đeo mặt nạ đánh bật '+NM[G.p.indexOf(o)]+' lùi '+(before-o.pos)+' ô')}} 
+{key:'masked-knight',n:'Hiệp sĩ đeo mặt nạ',tier:'red',d:'Triệu hồi hiệp sĩ đeo mặt nạ để đẩy người dẫn đầu lùi 30% chiều dài bản đồ.',ok:p=>p.gold>30?'':'Cần hơn 30 vàng',use:(p,ms)=>{const o=G.p.reduce((a,b)=>!a||b.pos>a.pos?b:a,null);if(!o){ms.push('Không có người chơi để hiệp sĩ hộ tống');return}const distance=Math.max(1,Math.floor(SZ()*.3)),before=o.pos;o.pos=Math.max(0,o.pos-distance);ms.push('Hiệp sĩ đeo mặt nạ đánh bật '+NM[G.p.indexOf(o)]+' lùi '+(before-o.pos)+' ô')}} 
 ,{key:'sahur',n:'Sahur',tier:'yellow',d:'Triệu hồi người gỗ Sahur. Người dẫn đầu bị đánh bật về ô xuất phát.',use:(p,ms)=>{const o=G.p.reduce((a,b)=>!a||b.pos>a.pos?b:a,null);if(!o){ms.push('Sahur xuất hiện nhưng không tìm thấy mục tiêu');return}const name=NM[G.p.indexOf(o)];o.pos=0;ms.push('Sahur giáng cú gõ: '+name+' trở về ô thấp nhất')}} 
 ,{key:'tornado',n:'VÒI RỒNG',tier:'black',d:'Hiệu ứng vĩnh viễn: sau mỗi lượt, toàn bộ bản đồ bị xáo trộn — ô sự kiện, vùng giảm tốc, rắn, thang và cổng đều đổi vị trí.',use:(p,ms)=>{G.tornado=true;ms.push('VÒI RỒNG đã hình thành. Bản đồ sẽ bị xáo trộn sau mỗi lượt cho đến hết ván.')}} 
-,{key:'snake-form',n:'Biến thành rắn',tier:'black',d:'Biến thành rắn trong 3 lượt. Trong thời gian này, mỗi đối thủ tung được ít nhất một viên xúc xắc trên 3 sẽ bị kéo tới vị trí cách bạn 5 ô phía sau.',use:(p,ms)=>{G.snakeForm={owner:G.p.indexOf(p),turnsLeft:3};ms.push('Bạn hóa thành rắn trong 3 lượt. Đối thủ tung trên 3 sẽ bị kéo về chiếc đuôi cách bạn 5 ô.')}}
+,{key:'snake-form',n:'Biến thành rắn',tier:'black',d:'Biến thành rắn trong 3 lượt của bạn. Trong thời gian này, mỗi đối thủ tung được ít nhất một viên xúc xắc trên 3 sẽ bị kéo tới vị trí cách bạn 5 ô phía sau.',use:(p,ms)=>{G.snakeForm={owner:G.p.indexOf(p),turnsLeft:3};ms.push('Bạn hóa thành rắn trong 3 lượt. Đối thủ tung trên 3 sẽ bị kéo về chiếc đuôi cách bạn 5 ô.')}}
 ]);
 // English card catalog: names and descriptions are part of the language switch too.
 const CARD_TEXT_EN = [
@@ -980,7 +980,11 @@ const CARD_TEXT_EN = [
  ['REWIND · Đảo Ngược Thời Khắc','REWIND · Rewind'],['Khôi phục vị trí của mọi người về thời điểm trước lượt gần nhất.','Restore everyone’s position to where it was before the previous turn.'],
  ['BLACK MIRROR · Gương Đen','BLACK MIRROR · Black Mirror'],['Sao chép hiệu ứng thẻ gần nhất đã được sử dụng trong ván.','Copy the effect of the most recently used card in the match.'],
  ['RIFT · Khe Nứt','RIFT · Rift'],['Mở một cặp cổng mới và lập tức dịch chuyển đến đầu bên kia.','Create a new pair of portals and immediately teleport to the other end.'],
- ['THE LAST DEBT · Món Nợ Cuối','THE LAST DEBT · The Last Debt'],['Đổi vị trí với người dẫn đầu; đổi lại bạn hiến tế toàn bộ vàng và các thẻ còn lại.','Swap places with the leader, sacrificing all your gold and remaining cards.']
+ ['THE LAST DEBT · Món Nợ Cuối','THE LAST DEBT · The Last Debt'],['Đổi vị trí với người dẫn đầu; đổi lại bạn hiến tế toàn bộ vàng và các thẻ còn lại.','Swap places with the leader, sacrificing all your gold and remaining cards.'],
+ ['Hiệp sĩ đeo mặt nạ','Masked Knight'],['Triệu hồi hiệp sĩ đeo mặt nạ để đẩy người dẫn đầu lùi 30% chiều dài bản đồ.','Summon a masked knight to push the leader back by 30% of the board length.'],
+ ['Sahur','Sahur'],['Triệu hồi người gỗ Sahur. Người dẫn đầu bị đánh bật về ô xuất phát.','Summon the wooden figure Sahur. The leader is sent back to the starting tile.'],
+ ['VÒI RỒNG','TORNADO'],['Hiệu ứng vĩnh viễn: sau mỗi lượt, toàn bộ bản đồ bị xáo trộn — ô sự kiện, vùng giảm tốc, rắn, thang và cổng đều đổi vị trí.','Permanent effect: after every turn, shuffle the whole board, including event tiles, slow zones, snakes, ladders and portals.'],
+ ['Biến thành rắn','Become a Snake'],['Biến thành rắn trong 3 lượt của bạn. Trong thời gian này, mỗi đối thủ tung được ít nhất một viên xúc xắc trên 3 sẽ bị kéo tới vị trí cách bạn 5 ô phía sau.','Become a snake for 3 of your turns. While active, any opponent who rolls a die higher than 3 is pulled to a tile 5 spaces behind you.']
 ];
 
 const ROOM_UI_TEXT = [
