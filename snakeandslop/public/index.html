@@ -458,10 +458,10 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 @media(prefers-reduced-motion:reduce){.is-tornado-shuffling,.sahur-figure,.sahur-club,.sahur-impact,.yellow-cine,.red-masked-knight .red-cine-core:before,.red-masked-knight .red-cine-core:after{animation:none!important}.yellow-cine{opacity:.88}}
 
 </style></head><body>
-<header><b>Rắn Rác</b><div class="header-tools"><select id="languageSwitch" aria-label="Language"><option value="vi">VI</option><option value="en">EN</option></select><button id="settingsOpen" title="Settings" aria-label="Settings">⚙</button><button id="bk" title="Back" aria-label="Back">←</button><button id="eb" title="Exit" aria-label="Exit">×</button></div></header>
+<header><b>Rắn Rác</b><div class="header-tools"><select id="languageSwitch" aria-label="Language"><option value="vi">VI</option><option value="en">EN</option><option value="kuku">Kukukaka</option></select><button id="settingsOpen" title="Settings" aria-label="Settings">⚙</button><button id="bk" title="Back" aria-label="Back">←</button><button id="eb" title="Exit" aria-label="Exit">×</button></div></header>
 <div id="devGate" hidden role="dialog" aria-modal="true" aria-labelledby="devGateTitle"><div class="dev-panel"><h3 id="devGateTitle">Developer access</h3><p>Nhập keycode để mở công cụ kiểm thử.</p><input id="devKeyInput" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" placeholder="KEYCODE" aria-label="Developer keycode"><div id="devGateMsg" aria-live="polite"></div><div class="row"><button id="devGateCancel">Hủy</button><button id="devGateSubmit" class="pri">Mở khóa</button></div></div></div>
 <div id="onlineOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="onlineTitle"><div class="online-panel"><div class="online-top"><div><div class="online-kicker">RẮN RÁC · MULTIPLAYER</div><h2 id="onlineTitle">Chơi trực tuyến</h2></div><button id="onlineClose" aria-label="Close">✕</button></div><div id="onlineContent"></div></div></div>
-<div id="appSettingsOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="settings-panel"><div class="online-top"><div><div class="online-kicker">PREFERENCES</div><h2 id="settingsTitle">Settings</h2></div><button id="settingsClose" aria-label="Close">✕</button></div><div class="settings-group"><strong>Language</strong><select id="settingsLanguage"><option value="vi">Tiếng Việt</option><option value="en">English</option></select></div><div class="settings-group"><strong>Graphics</strong><label>Quality<select id="graphicsQuality"><option value="low">Low · Battery friendly</option><option value="balanced">Balanced · Recommended</option><option value="high">High · Full effects</option></select></label><label class="settings-toggle"><span>Animations</span><input id="motionToggle" type="checkbox" checked></label><label class="settings-toggle"><span>Particles and glow</span><input id="particlesToggle" type="checkbox" checked></label><label class="settings-toggle"><span>Screen shake</span><input id="shakeToggle" type="checkbox" checked></label></div><div class="settings-group"><strong>Appearance</strong><select id="themeChoice"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div><p class="online-small" id="settingsHint">Settings are saved on this device.</p></div></div>
+<div id="appSettingsOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="settings-panel"><div class="online-top"><div><div class="online-kicker">PREFERENCES</div><h2 id="settingsTitle">Settings</h2></div><button id="settingsClose" aria-label="Close">✕</button></div><div class="settings-group"><strong>Language</strong><select id="settingsLanguage"><option value="vi">Tiếng Việt</option><option value="en">English</option><option value="kuku">Kukukaka</option></select></div><div class="settings-group"><strong>Graphics</strong><label>Quality<select id="graphicsQuality"><option value="low">Low · Battery friendly</option><option value="balanced">Balanced · Recommended</option><option value="high">High · Full effects</option></select></label><label class="settings-toggle"><span>Animations</span><input id="motionToggle" type="checkbox" checked></label><label class="settings-toggle"><span>Particles and glow</span><input id="particlesToggle" type="checkbox" checked></label><label class="settings-toggle"><span>Screen shake</span><input id="shakeToggle" type="checkbox" checked></label></div><div class="settings-group"><strong>Appearance</strong><select id="themeChoice"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></div><p class="online-small" id="settingsHint">Settings are saved on this device.</p></div></div>
 <div id="gameChatWidget" hidden><button id="gameChatToggle" aria-label="Open room chat" title="Room chat">💬<span id="gameChatUnread" hidden></span></button><div id="gameChatPanel" hidden><div class="chat-head"><b>Room chat</b><button id="gameChatClose" aria-label="Close chat">✕</button></div><div id="gameChatFeed" class="chat-feed" aria-live="polite"></div><form id="gameChatForm" class="chat-compose"><input id="gameChatInput" maxlength="280" placeholder="Say something…" autocomplete="off"><button class="pri" type="submit" aria-label="Send">➤</button></form></div></div>
 <input id="onlineMapFilePicker" type="file" accept=".json,application/json" hidden>
 <section class="s on" id="m"><div class="card menu-card">
@@ -527,11 +527,51 @@ const APP_TEXT_EXTRA = [
 ];
 APP_TEXT_EN.push(...APP_TEXT_EXTRA);
 
+const APP_TEXT_KUKU=[
+ ['Số người chơi','nô lệ'],['Players','nô lệ'],
+ ['Bản đồ','nơi sinh tồn'],['Board','nơi sinh tồn'],
+ ['Độ khó vùng cuối','ác mộng của nô lệ'],['End-zone difficulty','ác mộng của nô lệ'],
+ ['Độ hỗn loạn bản đồ','tỉ lệ sợ hãi'],['Độ hỗn loạn','tỉ lệ sợ hãi'],['Map chaos','tỉ lệ sợ hãi'],
+ ['Bộ thẻ khởi đầu','kỹ năng sinh tồn'],['BỘ THẺ KHỞI ĐẦU','kỹ năng sinh tồn'],['Starter cards','kỹ năng sinh tồn'],
+ ['Bắt đầu ván','Sinh tồn'],['Start game','Sinh tồn'],
+ ['Chơi online','sinh tồn online'],['Chơi trực tuyến','sinh tồn online'],['Online play','sinh tồn online'],
+ ['Biệt danh','Thông tin nô lệ'],['Nickname','Thông tin nô lệ'],
+ ['Loại phòng','Sân chơi'],['Room type','Sân chơi'],
+ ['Riêng tư','cô lập'],['Phòng riêng','cô lập'],['Private room','cô lập'],['PRIVATE ROOM','cô lập'],
+ ['Công khai','tự do'],['Public room','tự do'],['PUBLIC ROOM','tự do'],
+ ['Mã phòng','sửa đi'],['MÃ PHÒNG','sửa đi'],['ROOM CODE','sửa đi'],
+ ['Tung xúc xắc','vòng quay số mệnh'],['Roll dice','vòng quay số mệnh'],
+ ['Vàng','kinh phí'],['Gold','kinh phí'],
+ ['Ô','Ổ nô lệ'],['Tile','Ổ nô lệ']
+];
 let appLanguage='vi';
-try{appLanguage=localStorage.getItem('sl_language')==='en'?'en':'vi'}catch{}
+try{const savedLanguage=localStorage.getItem('sl_language');appLanguage=['en','kuku'].includes(savedLanguage)?savedLanguage:'vi'}catch{}
 const textOrigins=new WeakMap(), attributeOrigins=new WeakMap();
 function translateAppText(value){
  const source=String(value??'');
+ if(appLanguage==='kuku'){
+  let translated=source;
+  // Card labels and full descriptions intentionally collapse to the same Kukukaka word.
+  if(typeof CD!=='undefined'){
+   for(const card of CD){
+    if(card?.d&&translated.includes(card.d))return'gugugaga';
+    if(card?.n&&translated===card.n)return'gugugaga';
+    if(card?.n&&translated.includes(card.n))translated=translated.split(card.n).join('gugugaga');
+   }
+  }
+  const pairs=APP_TEXT_KUKU.slice().sort((a,b)=>b[0].length-a[0].length);
+  for(const [from,to] of pairs){
+   if(from==='Ô'||from==='Tile'){
+    const re=from==='Ô'?/(^|[^\\p{L}\\p{N}_])Ô(?=$|[^\\p{L}\\p{N}_])/giu:/\\bTile\\b/giu;
+    translated=translated.replace(re,(_,prefix='')=>prefix+to);
+   }else{
+    const escaped=from.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\function translateAppText(value){
+ const source=String(value??'');');
+    translated=translated.replace(new RegExp(escaped,'gi'),to);
+   }
+  }
+  return translated;
+ }
  const brandToken='\uE000SNAKERACCBRAND\uE001';
  const protectedSource=source.replace(/Rắn Rác|Snake Slop/gi,brandToken);
  const dictionary=new Map();
@@ -568,7 +608,7 @@ function applyLanguage(){
  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);while(walker.nextNode()){const n=walker.currentNode;if(!textOrigins.has(n))textOrigins.set(n,n.nodeValue);const value=translateAppText(textOrigins.get(n));if(n.nodeValue!==value)n.nodeValue=value;}
  document.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el=>{for(const attr of ['placeholder','title','aria-label']){if(!el.hasAttribute(attr))continue;let saved=attributeOrigins.get(el);if(!saved){saved={};attributeOrigins.set(el,saved)}if(!(attr in saved))saved[attr]=el.getAttribute(attr);const value=translateAppText(saved[attr]);if(el.getAttribute(attr)!==value)el.setAttribute(attr,value)}});
 }
-function setAppLanguage(value){appLanguage=value==='en'?'en':'vi';try{localStorage.setItem('sl_language',appLanguage)}catch{}applyLanguage()}
+function setAppLanguage(value){appLanguage=['en','kuku'].includes(value)?value:'vi';try{localStorage.setItem('sl_language',appLanguage)}catch{}applyLanguage()}
 const graphicsPrefs=(()=>{try{return Object.assign({quality:'balanced',motion:true,particles:true,shake:true},JSON.parse(localStorage.getItem('sl_graphics')||'{}'))}catch{return {quality:'balanced',motion:true,particles:true,shake:true}}})();
 function shouldReduceEffects(){return !graphicsPrefs.motion||graphicsPrefs.quality==='low'||!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)}
 function applyGraphicsPrefs(){document.documentElement.dataset.gfx=graphicsPrefs.quality;document.documentElement.dataset.effects=graphicsPrefs.motion?'on':'off';document.documentElement.dataset.particles=graphicsPrefs.particles?'on':'off';const map={graphicsQuality:graphicsPrefs.quality,motionToggle:graphicsPrefs.motion,particlesToggle:graphicsPrefs.particles,shakeToggle:graphicsPrefs.shake};for(const [id,v] of Object.entries(map)){const e=document.getElementById(id);if(e)e.type==='checkbox'?e.checked=!!v:e.value=v}}
