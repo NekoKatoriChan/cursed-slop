@@ -438,7 +438,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .sahur-hand{position:absolute;right:24px;top:75px;width:28px;height:28px;border:4px solid #543313;border-radius:50%;background:#dca45e;transform-origin:50% 80%;animation:sahur-tap .7s 1.1s ease-in both}
 .sahur-impact{position:absolute;left:50%;bottom:-10px;width:20px;height:20px;border:5px solid #ffe39a;border-radius:50%;transform:translateX(-50%);animation:sahur-impact 1.1s 1.35s ease-out both}
 @keyframes sahur-drop{0%{opacity:0;transform:translateY(110vh) rotate(-18deg)}65%{opacity:1;transform:translateY(-12px) rotate(7deg)}82%{transform:translateY(14px) rotate(-3deg)}100%{opacity:1;transform:translateY(0) rotate(0)}}
-@keyframes sahur-tap{0%{transform:rotate(38deg)}55%{transform:rotate(-78deg)}100%{transform:rotate(15deg)}}
+@keyframes sahur-tap{0%{transform:translate(0,0) scale(1)}55%{transform:translate(-30px,34px) scale(1.18)}100%{transform:translate(-18px,18px) scale(1)}}
 @keyframes sahur-impact{0%{opacity:0;transform:translateX(-50%) scale(.3)}20%{opacity:1}100%{opacity:0;transform:translateX(-50%) scale(15)}}
 @keyframes yellow-summon-bg{0%{opacity:0}10%,84%{opacity:1}100%{opacity:0}}
 .fx-tornado .fx-core{background:conic-gradient(from 0deg,#8cecff,#142e4a,#d9fbff,#253d65,#8cecff);box-shadow:0 0 35px #8cecff,0 0 110px rgba(57,184,232,.45);animation:fx-spin 1.2s linear infinite,fx-core-arrive-max 2.6s cubic-bezier(.12,.82,.16,1) both}
