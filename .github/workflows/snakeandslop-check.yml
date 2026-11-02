@@ -1,0 +1,29 @@
+name: Snake Slop checks
+
+on:
+  push:
+    branches:
+      - feat/mobile-ui-chaos-cards
+    paths:
+      - "snakeandslop/**"
+      - ".github/workflows/snakeandslop-check.yml"
+  pull_request:
+    paths:
+      - "snakeandslop/**"
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check Worker syntax
+        working-directory: snakeandslop
+        run: node --check src/worker.js
+      - name: Run smoke tests
+        working-directory: snakeandslop
+        run: node tests/smoke.mjs
